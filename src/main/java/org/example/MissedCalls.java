@@ -1,54 +1,34 @@
 package org.example;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
 public class MissedCalls {
-    private HashMap<String, Contact> contacts;
-    private TreeMap<LocalDateTime, String> missedCalls;
+    private Map<LocalDateTime, String> missedCalls = new TreeMap<>(); /*ключ — время пропущенного вызова,
+    значение — номер телефона*/
 
-    public MissedCalls(HashMap<String, Contact> contacts) {
-        this.missedCalls = new TreeMap<>();
-        this.contacts = contacts;
+    public void addMissedCall(String phone) {//добавить пропущенный
+        missedCalls.put(LocalDateTime.now(), phone);
     }
 
-    public void addMissedCall(String phoneNumber) {
-        missedCalls.put(LocalDateTime.now(), phoneNumber);
-    }
-
-    public void showMissedCalls() {
-        for (Map.Entry<LocalDateTime, String> entry : missedCalls.entrySet()) { // итерация по парам ключ/значение пропущенные вызовы
-            LocalDateTime time = entry.getKey();
-            String missedPhone = entry.getValue();
-
-            // Stream API
-//            Optional<Map.Entry<String, Contact>> optional = this.contacts.entrySet().stream()
-//                    .filter((item) -> item.getValue().getPhoneNumber().equals(missedPhone))
-//                    .findFirst();
-//            if (optional.isEmpty()) {
-//                System.out.println(time + " : " + missedPhone + " : неизвестный");
-//            } else {
-//                System.out.println(time + " : " + missedPhone + " : " + optional.get().getValue().getName());
-//            }
-
-
-            String result = null;
-            for (Map.Entry<String, Contact> stringContactEntry : this.contacts.entrySet()) {
-                if (stringContactEntry.getValue().getPhoneNumber().equals(missedPhone)) {
-                    result = time + " : " + missedPhone + " : " + stringContactEntry.getValue().getName();
-                    break;
-                } else {
-                    result = time + " : " + missedPhone + " : неизвестный";
-                }
-            }
-            System.out.println(result);
-
+    public String showAllMissedCalls(Phonebook contactsBook) { // показать все пропущенные вызовы
+        StringBuilder sb = new StringBuilder();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");//преобразуем дату в другой формат
+        for (Map.Entry<LocalDateTime, String> entry : missedCalls.entrySet()) {
+            Contact contactInBook = contactsBook.findContactByPhone(entry.getValue());
+            sb
+                    .append(dtf.format(entry.getKey()))
+                    .append("\t\t")
+                    .append((contactInBook == null) ? entry.getValue() : contactInBook)//вывести контакт
+                    .append("\n");
         }
+        return sb.toString();
+    }
 
-
+    public void deleteAllMissedCalls() {//удаление списка пропущенных
+        missedCalls.clear();
     }
 }
 
